@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Momentum - Unlock Badges</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1B263B;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .badges-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 900px;
+        }
+
+        .badge {
+            width: 120px;
+            height: 160px;
+            background-color: #4682B4;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .badge.locked {
+            background-color: #6C757D;
+            cursor: not-allowed;
+        }
+
+        .badge:hover:not(.locked) {
+            transform: scale(1.1);
+            background-color: #5DADE2;
+        }
+
+        .badge img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .badge span {
+            font-size: 0.9rem;
+        }
+
+        .locked-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #fff;
+        }
+
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: #2C3E50;
+            color: #fff;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            z-index: 9999;
+            opacity: 0;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .popup.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #FFD700;
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: #FFB700;
+        }
+
+        .sparkles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9998;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(circle, #FFD700 0%, rgba(255, 223, 0, 0) 70%);
+            border-radius: 50%;
+            animation: sparkle-fall 2s linear infinite;
+        }
+
+        @keyframes sparkle-fall {
+            0% {
+                opacity: 1;
+                transform: translateY(-10px) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) scale(0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Momentum</h1>
+    <div class="badges-section">
+        <div class="badges" id="badges"></div>
+    </div>
+    <div class="popup" id="popup">
+        <p id="popupText"></p>
+        <button class="back-button" id="backButton">Back</button>
+    </div>
+    <div class="sparkles" id="sparkles"></div>
+
+    <script>
+        const userData = {
+            badges: [
+                { name: "Habit Hero", description: "Create 10 habits!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/190/190411.png" },
+            { name: "Streak Master", description: "Maintain a 7-day streak!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/190/190416.png" },
+            { name: "Goal Getter", description: "Complete 5 goals!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/190/190422.png" },
+            { name: "Consistency Champ", description: "Maintain a 30-day streak!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/190/190415.png" },
+            { name: "Early Riser", description: "Log habits before 8 AM for 5 days!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/190/190410.png" },
+            { name: "Night Owl", description: "Log habits at midnight 7 times!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/190/190418.png" },
+            { name: "Team Player", description: "Join and contribute to a group!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/190/190426.png" },
+            { name: "Completionist", description: "Complete all planned habits for 15 days!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/190/190417.png" },
+            { name: "Ultimate Streaker", description: "Maintain a 100-day streak!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/190/190420.png" },
+            { name: "Focused", description: "Log habits daily for 10 days!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/190/190429.png" },
+            { name: "Achiever", description: "Achieve all weekly goals!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/190/190414.png" },
+            { name: "Marathoner", description: "Log habits consistently for 50 days!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/190/190423.png" },
+    { name: "Planner Pro", description: "Plan habits for the next 30 days!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/1484/1484865.png" }, // Calendar with a pencil for planning.
+     { name: "Habit Explorer", description: "Try 5 new habits!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/2991/2991254.png" }, // Explorer compass for trying new things.
+    { name: "Task Finisher", description: "Finish 10 tasks in a day!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/847/847969.png" }, // Checkbox list for completing tasks.
+    { name: "Daily Doer", description: "Log habits for 15 consecutive days!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/747/747310.png" }, // Calendar with days marked.
+    { name: "Habit Hacker", description: "Complete 3 challenging habits!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/1702/1702758.png" }, // Brain with gears for solving challenges.
+    { name: "Early Bird", description: "Log all habits before 7 AM for 10 days!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/869/869636.png" }, // Sunrise icon for early risers.
+    { name: "Night Prowler", description: "Log habits after 11 PM for 5 days!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/846/846827.png" }, // Crescent moon for night activities.
+    { name: "Supporter", description: "Motivate 5 friends to complete their habits!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/1046/1046863.png" }, // Hands holding a heart to symbolize support.
+    { name: "Milestone Reacher", description: "Achieve a 50% milestone on your goals!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/2232/2232688.png" }, // Flag on a mountain for milestone achievements.
+    { name: "Quick Starter", description: "Log habits within 10 minutes of their schedule!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/860/860784.png" }, // Stopwatch for quick actions.
+     { name: "Momentum Maker", description: "Log habits every single day for 20 days!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/2990/2990832.png" }, // Running icon for building momentum.
+    { name: "Weekend Warrior", description: "Log habits every weekend for a month!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/867/867700.png" }, // Sun over a calendar for weekends.
+    { name: "Top Performer", description: "Rank #1 on the leaderboard for a week!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" }, // Gold medal for top performance.
+    { name: "Social Butterfly", description: "Share 10 achievements with your friends!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/3140/3140238.png" }, // Megaphone to symbolize sharing.
+    { name: "One Week Wonder", description: "Log every habit for a full week!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/2922/2922510.png" }, // Calendar with check marks for weekly tracking.
+    { name: "Three-Month Streaker", description: "Maintain a 90-day streak!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/747/747310.png" }, // Spiral-bound calendar for longer durations.
+    { name: "Goal Crusher", description: "Complete 10 major goals!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/1006/1006494.png" }, // Target and dart for goal achievements.
+    { name: "Early Planner", description: "Plan your day before 6 AM for a week!", unlocked: false, sticker: "https://cdn-icons-png.flaticon.com/512/992/992699.png" }, // Alarm clock with notes for early planning.
+    { name: "Group Leader", description: "Lead a group to complete their shared goals!", unlocked: true, sticker: "https://cdn-icons-png.flaticon.com/512/3197/3197942.png" }, // Leader icon with group members.
+    
+            ],
+        };
+
+        const badgesDiv = document.getElementById("badges");
+        const popup = document.getElementById("popup");
+        const popupText = document.getElementById("popupText");
+        const backButton = document.getElementById("backButton");
+        const sparkles = document.getElementById("sparkles");
+
+        // Display badges dynamically
+        function displayBadges() {
+            badgesDiv.innerHTML = ""; // Clear existing badges
+            userData.badges.forEach((badge, index) => {
+                const badgeElement = document.createElement("div");
+                badgeElement.classList.add("badge");
+                if (!badge.unlocked) {
+                    badgeElement.classList.add("locked");
+                    badgeElement.innerHTML = `
+                        <div class="locked-overlay">Locked</div>
+                        <img src="${badge.sticker}" alt="Badge">
+                        <span>${badge.name}</span>
+                    `;
+                } else {
+                    badgeElement.innerHTML = `
+                        <img src="${badge.sticker}" alt="Badge">
+                        <span>${badge.name}</span>
+                    `;
+                }
+
+                badgeElement.onclick = () => unlockBadge(badge, index);
+                badgesDiv.appendChild(badgeElement);
+            });
+        }
+
+        // Show badge info and add sparkles
+        function unlockBadge(badge, index) {
+            if (!badge.unlocked && badge.taskCompleted) {
+                // Unlock the badge
+                badge.unlocked = true;
+                displayBadges();
+            }
+
+            if (!badge.unlocked) return;
+
+            // Show popup
+            popupText.textContent = badge.description;
+            popup.classList.add("active");
+
+            // Add sparkles
+            for (let i = 0; i < 150; i++) {
+                const sparkle = document.createElement("div");
+                sparkle.className = "sparkle";
+                sparkle.style.left = `${Math.random() * 100}%`;
+                sparkle.style.top = `${Math.random() * 100}%`;
+                sparkle.style.animationDelay = `${Math.random()}s`;
+                sparkles.appendChild(sparkle);
+
+                setTimeout(() => sparkle.remove(), 2000);
+            }
+        }
+
+        // Close popup
+        backButton.onclick = () => {
+            popup.classList.remove("active");
+        };
+
+        // Initialize badges
+        displayBadges();
+    </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Insights</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1B263B;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #A9D6E5;
+    }
+
+    canvas {
+      max-width: 600px;
+      margin: 20px auto;
+    }
+
+    .stats {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .stats p {
+      margin: 5px 0;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 10px;
+    }
+
+    .button {
+      width: 200px;
+      padding: 10px;
+      border: 1px solid #4682B4;
+      border-radius: 5px;
+      background-color: #4682B4;
+      color: white;
+      cursor: pointer;
+      font-size: 1rem;
+      text-align: center;
+      transition: background-color 0.3s;
+    }
+
+    .button:hover {
+      background-color: #5DADE2;
+    }
+  </style>
+</head>
+<body>
+  <h1>Habit Insights</h1>
+  <canvas id="habitChart"></canvas>
+  
+  <div class="stats">
+    <h2>Statistics</h2>
+    <p>Longest Streak: <span id="longestStreak">0</span> days</p>
+    <p>Overall Completion: <span id="overallCompletion">0</span>%</p>
+  </div>
+
+  <div class="button-container">
+    <button class="button" onclick="exportStats()">Export Your Stats</button>
+    <button class="button" onclick="clearStats()">Reset Stats</button>
+  </div>
+
+  <script>
+    const habits = JSON.parse(localStorage.getItem('habits')) || [];
+
+    function calculateWeeklyCompletion(habit) {
+      const weeks = [0, 0, 0, 0, 0];
+      const now = new Date();
+      habit.history.forEach(timestamp => {
+        const dayOfMonth = new Date(timestamp).getDate();
+        const weekIndex = Math.floor((dayOfMonth - 1) / 7);
+        weeks[weekIndex]++;
+      });
+      return weeks;
+    }
+
+    function calculateLongestStreak() {
+      return habits.reduce((max, habit) => Math.max(max, habit.streak), 0);
+    }
+
+    function calculateOverallCompletion() {
+      const totalDays = habits.length * 30;
+      const completedDays = habits.reduce((sum, habit) => sum + habit.history.length, 0);
+      return totalDays > 0 ? ((completedDays / totalDays) * 100).toFixed(1) : 0;
+    }
+
+    function renderChart() {
+      const ctx = document.getElementById('habitChart').getContext('2d');
+      const weeklyData = habits.map(habit => calculateWeeklyCompletion(habit));
+
+      const datasets = weeklyData.map((data, index) => ({
+        label: habits[index].name,
+        data: data,
+        backgroundColor: `hsl(${index * 60}, 70%, 50%)`,
+      }));
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
+          datasets: datasets,
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: 'Days Completed' },
+            },
+            x: { title: { display: true, text: 'Weeks' } },
+          },
+        },
+      });
+    }
+
+    function exportStats() {
+      window.location.href = "importexport.html";
+    }
+
+    function clearStats() {
+      localStorage.removeItem('habits');
+      location.reload();
+    }
+
+    document.getElementById('longestStreak').textContent = calculateLongestStreak();
+    document.getElementById('overallCompletion').textContent = calculateOverallCompletion();
+    renderChart();
+  </script>
+</body>
+</html>

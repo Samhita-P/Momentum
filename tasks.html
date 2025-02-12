@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Manager</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1B263B;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-top: 20px;
+      text-align: center;
+      color: #A9D6E5;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 500px;
+      background-color: #2C3E50;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px auto;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #A9D6E5;
+    }
+
+    input, textarea, select, button {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #4682B4;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      background-color: #1B263B;
+      color: #fff;
+    }
+
+    button {
+      background-color: #4682B4;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #5DADE2;
+    }
+
+    .customization-btn {
+      background-color: #5DADE2;
+      margin-top: 10px;
+    }
+
+    .customization-btn:hover {
+      background-color: #76C7E3;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background-color: #1B263B;
+      border: 1px solid #4682B4;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 10px;
+      color: #A9D6E5;
+    }
+
+    .habit-details {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .day {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      border-radius: 50%;
+      background-color: #2C3E50;
+      border: 1px solid #4682B4;
+      color: #A9D6E5;
+      cursor: pointer;
+    }
+
+    .day.completed {
+      background-color: #4682B4;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Habit Manager</h1>
+  <div class="container">
+    <h2>Add a New Habit</h2>
+    <form id="habit-form">
+      <label for="habit-name">Habit Name</label>
+      <input type="text" id="habit-name" required>
+      <label for="habit-desc">Description</label>
+      <textarea id="habit-desc" rows="2"></textarea>
+      <label for="frequency">Frequency</label>
+      <select id="frequency">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+      </select>
+      <button type="submit">Add Habit</button>
+    </form>
+
+    <!-- Customization Button -->
+    <button class="customization-btn" onclick="redirectToCustomization()">Customization</button>
+
+    <h2>Your Habits</h2>
+    <ul id="habit-list"></ul>
+  </div>
+
+  <script>
+    const habitForm = document.getElementById('habit-form');
+    const habitList = document.getElementById('habit-list');
+    let habits = JSON.parse(localStorage.getItem('habits')) || [];
+
+    function saveHabits() {
+      localStorage.setItem('habits', JSON.stringify(habits));
+    }
+
+    function renderHabits() {
+      habitList.innerHTML = '';
+      habits.forEach((habit, index) => {
+        const habitItem = document.createElement('li');
+        habitItem.innerHTML = `
+          <div class="habit-details">
+            <strong>${habit.name}</strong>
+            <span>Streak: ${habit.streak}</span>
+          </div>
+          <div class="calendar">${generateCalendar(habit.history)}</div>
+          <button onclick="markComplete(${index})">Mark Complete</button>
+          <button onclick="deleteHabit(${index})">Delete</button>
+        `;
+        habitList.appendChild(habitItem);
+      });
+    }
+
+    function generateCalendar(history) {
+      return Array.from({ length: 30 }, (_, i) => {
+        const day = i + 1;
+        const completed = history.includes(day);
+        return `<div class="day ${completed ? 'completed' : ''}">${day}</div>`;
+      }).join('');
+    }
+
+    function markComplete(index) {
+      const day = new Date().getDate();
+      if (!habits[index].history.includes(day)) {
+        habits[index].history.push(day);
+        habits[index].streak++;
+      }
+      saveHabits();
+      renderHabits();
+    }
+
+    function deleteHabit(index) {
+      habits.splice(index, 1);
+      saveHabits();
+      renderHabits();
+    }
+
+    habitForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('habit-name').value;
+      const desc = document.getElementById('habit-desc').value;
+      const frequency = document.getElementById('frequency').value;
+      habits.push({ name, desc, frequency, streak: 0, history: [] });
+      saveHabits();
+      renderHabits();
+      habitForm.reset();
+    });
+
+    function redirectToCustomization() {
+      window.location.href = "customisation.html"; // Change this to the actual file name
+    }
+
+    renderHabits();
+  </script>
+</body>
+</html>

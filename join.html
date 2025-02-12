@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Momentum - Group Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1B263B;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            animation: fadeInDown 1.2s ease-in-out;
+        }
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #A9D6E5;
+            animation: fadeInUp 1.2s ease-in-out;
+        }
+        .container {
+            text-align: center;
+            animation: zoomIn 1s ease;
+        }
+        .btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #4682B4;
+            color: #fff;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn:hover {
+            background: #5DADE2;
+            transform: scale(1.05);
+        }
+        .code-section, .join-section, .share-options {
+            display: none;
+            margin-top: 20px;
+        }
+        .code-display {
+            font-size: 1.5rem;
+            margin: 20px 0;
+            background-color: #2C3E50;
+            padding: 10px 20px;
+            border-radius: 5px;
+            letter-spacing: 2px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            color: #333;
+        }
+        .share-options {
+            flex-direction: column;
+            align-items: center;
+            display: none;
+        }
+        .share-btn {
+            padding: 10px 15px;
+            margin: 5px;
+            font-size: 0.9rem;
+            background: #5DADE2;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 200px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        .share-btn:hover {
+            background: #76C7E1;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Momentum</h1>
+    <h2>Build your streak, build your life</h2>
+    <button class="btn" onclick="createGroup()">Create a New Group</button>
+    <button class="btn" onclick="joinGroup()">Join an Existing Group</button>
+
+    <div class="code-section" id="codeSection">
+        <div class="code-display" id="groupCode">XXXXXX</div>
+        <button class="btn" onclick="showShareOptions()">Share via Apps</button>
+    </div>
+
+    <div class="join-section" id="joinSection">
+        <input type="text" id="joinCode" class="input-field" placeholder="Enter Group Code">
+        <button class="btn" onclick="verifyCode()">Join Group</button>
+    </div>
+
+    <div class="share-options" id="shareOptions">
+        <button class="share-btn" onclick="shareViaApp('whatsapp')">WhatsApp</button>
+        <button class="share-btn" onclick="shareViaApp('instagram')">Instagram</button>
+        <button class="share-btn" onclick="shareViaApp('sms')">Messages</button>
+        <button class="share-btn" onclick="shareViaApp('facebook')">Facebook</button>
+        <button class="share-btn" onclick="shareViaApp('twitter')">Twitter</button>
+    </div>
+</div>
+
+<script>
+    let currentGroupCode = '';
+
+    // Generate random group code
+    function generateCode() {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < 6; i++) {
+            code += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return code;
+    }
+
+    // Show create group section
+    function createGroup() {
+        currentGroupCode = generateCode();
+        document.getElementById('groupCode').innerText = currentGroupCode;
+
+        // Save the group code in localStorage (simulate database)
+        const groups = JSON.parse(localStorage.getItem('groups')) || [];
+        groups.push(currentGroupCode);
+        localStorage.setItem('groups', JSON.stringify(groups));
+
+        document.getElementById('codeSection').style.display = 'block';
+        document.getElementById('joinSection').style.display = 'none';
+        document.getElementById('shareOptions').style.display = 'none';
+    }
+
+    // Show join group section
+    function joinGroup() {
+        document.getElementById('codeSection').style.display = 'none';
+        document.getElementById('joinSection').style.display = 'block';
+        document.getElementById('shareOptions').style.display = 'none';
+    }
+
+    // Verify group code and proceed
+    function verifyCode() {
+        const enteredCode = document.getElementById('joinCode').value;
+        const groups = JSON.parse(localStorage.getItem('groups')) || [];
+
+        if (groups.includes(enteredCode)) {
+            alert('Successfully joined the group!');
+            window.location.href = 'index.html'; // Replace with the next tab/page URL
+        } else {
+            alert('Invalid group code. Please try again.');
+        }
+    }
+
+    // Show share options only after Share via Apps button is pressed
+    function showShareOptions() {
+        document.getElementById('shareOptions').style.display = 'flex';
+    }
+
+    // Share code via apps
+    function shareViaApp(app) {
+        const shareText = `Join my group on Momentum! Use this code: ${currentGroupCode}`;
+        let shareUrl = '';
+
+        switch (app) {
+            case 'whatsapp':
+                shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+                break;
+            case 'instagram':
+                alert("Instagram sharing requires manual text copy as it doesn't support direct message API.");
+                return;
+            case 'sms':
+                shareUrl = `sms:?body=${encodeURIComponent(shareText)}`;
+                break;
+            case 'facebook':
+                shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareText)}`;
+                break;
+            case 'twitter':
+                shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+                break;
+        }
+
+        window.open(shareUrl, '_blank');
+    }
+</script>
+
+</body>
+</html>

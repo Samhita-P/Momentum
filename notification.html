@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Momentum - Habit Notifications</title>
+  <style>
+    /* Styled Blue Theme */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #1B263B;
+      color: #F0F8FF;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: #A9D6E5;
+    }
+
+    .container {
+      background-color: #2C3E50;
+      border-radius: 20px;
+      padding: 30px 40px;
+      box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      width: 80%;
+      max-width: 400px;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin: 15px 0;
+      font-size: 1.2rem;
+      background-color: #4682B4;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background-color: #5DADE2;
+      transform: scale(1.05);
+    }
+
+    /* Notification Style */
+    .notification {
+      position: fixed;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #4682B4;
+      color: #fff;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+      font-size: 1rem;
+      opacity: 0;
+      transition: bottom 0.5s ease-out, opacity 0.5s ease-out;
+    }
+
+    .show {
+      bottom: 20px;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <h1>Momentum - Habit Tracker</h1>
+  <div class="container">
+    <button id="toggle-notifications">Enable Notifications</button>
+    <button id="send-daily">Send Daily Reminder</button>
+    <button id="send-missed">Send Missed Habit Alert</button>
+  </div>
+
+  <!-- Notification Box -->
+  <div id="notification" class="notification"></div>
+
+  <script>
+    const notificationBox = document.getElementById("notification");
+    const toggleButton = document.getElementById("toggle-notifications");
+    const dailyButton = document.getElementById("send-daily");
+    const missedButton = document.getElementById("send-missed");
+
+    // Check if notifications are enabled (stored in localStorage)
+    let notificationsEnabled = localStorage.getItem("notifications") === "true";
+
+    function updateToggleButton() {
+      toggleButton.textContent = notificationsEnabled ? "Disable Notifications" : "Enable Notifications";
+    }
+
+    updateToggleButton();
+
+    // Function to show notification
+    function showNotification(message) {
+      notificationBox.textContent = message;
+      notificationBox.classList.add("show");
+
+      setTimeout(() => {
+        notificationBox.classList.remove("show");
+      }, 3000); // Hide after 3 seconds
+    }
+
+    // Function to toggle notifications
+    toggleButton.addEventListener("click", () => {
+      notificationsEnabled = !notificationsEnabled;
+      localStorage.setItem("notifications", notificationsEnabled);
+      updateToggleButton();
+
+      showNotification(notificationsEnabled ? "Notifications Enabled!" : "Notifications Disabled!");
+    });
+
+    // Function to send daily reminder
+    function sendDailyReminder() {
+      if (!notificationsEnabled) {
+        showNotification("Enable notifications first!");
+        return;
+      }
+      showNotification("📅 Don't forget to complete your daily habits!");
+    }
+
+    // Function to send missed habit alert
+    function sendMissedHabitAlert() {
+      if (!notificationsEnabled) {
+        showNotification("Enable notifications first!");
+        return;
+      }
+      showNotification("⚠️ Your streak is about to break! Complete your habit now!");
+    }
+
+    // Attach button listeners
+    dailyButton.addEventListener("click", sendDailyReminder);
+    missedButton.addEventListener("click", sendMissedHabitAlert);
+
+    // Automatic Notifications every 24 hours
+    function scheduleDailyReminder() {
+      if (notificationsEnabled) {
+        sendDailyReminder();
+      }
+    }
+
+    function scheduleMissedHabitAlert() {
+      if (notificationsEnabled) {
+        sendMissedHabitAlert();
+      }
+    }
+
+    // Set daily notifications
+    setInterval(scheduleDailyReminder, 24 * 60 * 60 * 1000); // Every 24 hours
+    setInterval(scheduleMissedHabitAlert, 25 * 60 * 60 * 1000); // Every 25 hours (missed habit alert)
+  </script>
+</body>
+</html>

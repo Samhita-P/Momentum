@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Social Features</title>
+  <style>
+    /* Base styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1B263B; /* Dark navy background */
+      color: #ffffff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: #A9D6E5; /* Light blue text */
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      color: #A9D6E5;
+      margin-bottom: 15px;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 600px;
+      background-color: #2C3E50; /* Card background */
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.5);
+      margin-bottom: 30px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #4682B4;
+      font-size: 1rem;
+      background-color: #1B263B; /* Input background */
+      color: #ffffff;
+    }
+
+    input:focus, button:focus {
+      outline: none;
+      border: 1px solid #A9D6E5; /* Focus effect */
+    }
+
+    button {
+      background: #4682B4; /* Blue button */
+      color: #ffffff;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background: #5DADE2; /* Lighter blue hover */
+      transform: scale(1.05);
+    }
+
+    .friend-list {
+      margin-top: 20px;
+    }
+
+    .friend-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #34495E; /* Slightly lighter card */
+      padding: 15px;
+      border-radius: 10px;
+      margin: 10px 0;
+      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .friend-details h3 {
+      margin: 0;
+      font-size: 1.3rem;
+      color: #A9D6E5;
+    }
+
+    .friend-details p {
+      margin: 5px 0;
+      font-size: 0.9rem;
+      color: #D1E8FF;
+    }
+
+    .delete-btn {
+      background: #FF6B6B; /* Red delete button */
+      color: #ffffff;
+      padding: 8px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s, background 0.3s;
+    }
+
+    .delete-btn:hover {
+      background: #FF7D7D; /* Slightly lighter red */
+      transform: scale(1.1);
+    }
+
+    .leaderboard {
+      margin-top: 20px;
+    }
+
+    .rank-row {
+      display: flex;
+      justify-content: space-between;
+      background: #2C3E50; /* Dark card */
+      padding: 12px 15px;
+      border-radius: 10px;
+      border: 1px solid #4682B4;
+      margin: 10px 0;
+    }
+
+    .rank {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #A9D6E5;
+    }
+
+    .rank-row:nth-child(1) .rank {
+      color: #FFD700; /* Gold for 1st place */
+    }
+
+    .rank-row:nth-child(2) .rank {
+      color: #C0C0C0; /* Silver for 2nd place */
+    }
+
+    .rank-row:nth-child(3) .rank {
+      color: #CD7F32; /* Bronze for 3rd place */
+    }
+  </style>
+</head>
+<body>
+  <h1>Social Features</h1>
+  <div class="container">
+    <h2>Add a Friend</h2>
+    <form id="add-friend-form">
+      <div>
+        <input type="text" id="name" placeholder="Enter friend's name" required>
+      </div>
+      <div>
+        <input type="number" id="streak" placeholder="Enter streak count" required>
+      </div>
+      <button type="submit">Add Friend</button>
+    </form>
+  </div>
+
+  <div class="container friend-list">
+    <h2>Friend List</h2>
+    <div id="friend-cards"></div>
+  </div>
+
+  <div class="container leaderboard">
+    <h2>Leaderboard</h2>
+    <div id="leaderboard-rows"></div>
+  </div>
+
+  <script>
+    const addFriendForm = document.getElementById("add-friend-form");
+    const friendCards = document.getElementById("friend-cards");
+    const leaderboardRows = document.getElementById("leaderboard-rows");
+
+    let friends = [];
+
+    const renderFriends = () => {
+      friendCards.innerHTML = "";
+      leaderboardRows.innerHTML = "";
+
+      const sortedFriends = [...friends].sort((a, b) => b.streak - a.streak);
+
+      sortedFriends.forEach((friend, index) => {
+        const card = document.createElement("div");
+        card.className = "friend-card";
+        card.innerHTML = `
+          <div class="friend-details">
+            <h3>${friend.name}</h3>
+            <p>Streak: ${friend.streak}</p>
+          </div>
+          <button class="delete-btn" data-index="${index}">Delete</button>
+        `;
+        friendCards.appendChild(card);
+
+        const row = document.createElement("div");
+        row.className = "rank-row";
+        row.innerHTML = `
+          <span class="rank">#${index + 1}</span>
+          <span>${friend.name}</span>
+          <span>${friend.streak} days</span>
+        `;
+        leaderboardRows.appendChild(row);
+      });
+
+      document.querySelectorAll(".delete-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          const index = parseInt(e.target.getAttribute("data-index"));
+          friends.splice(index, 1);
+          renderFriends();
+        });
+      });
+    };
+
+    addFriendForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const streak = parseInt(document.getElementById("streak").value, 10);
+
+      friends.push({ name, streak });
+      renderFriends();
+      addFriendForm.reset();
+    });
+
+    renderFriends();
+  </script>
+</body>
+</html>

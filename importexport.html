@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Momentum - Export Progress</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    body { font-family: 'Arial', sans-serif; background-color: #1B263B; color: #F0F8FF; text-align: center; }
+    h1 { color: #A9D6E5; }
+    button { padding: 10px 20px; font-size: 1.2rem; background-color: #4682B4; color: white; border: none; cursor: pointer; }
+    iframe { display: none; }
+  </style>
+</head>
+<body>
+  <h1>Export Your Progress</h1>
+  <button id="export-pdf">Export Progress as PDF</button>
+
+  <iframe id="tasks-frame" src="./tasks.html"></iframe>
+  <iframe id="tracker-frame" src="./tracker.html"></iframe>
+
+  <script>
+    let tasks = [], progress = [];
+
+    // Listen for messages from tasks.html and tracker.html
+    window.addEventListener("message", (event) => {
+      if (event.data.type === "tasks") {
+        tasks = event.data.data;
+        console.log("Tasks received:", tasks);
+      } else if (event.data.type === "progress") {
+        progress = event.data.data;
+        console.log("Habit progress received:", progress);
+      }
+    });
+
+    // Generate PDF
+    document.getElementById("export-pdf").addEventListener("click", () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFontSize(22);
+      doc.setTextColor("#4682B4");
+      doc.text("Momentum Progress Report", 20, 20);
+
+      doc.setFontSize(12);
+      doc.setTextColor("#333");
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 30);
+
+      // Tasks Section
+      doc.setFontSize(14);
+      doc.setTextColor("#000");
+      doc.text("Tasks Overview:", 20, 45);
+
+      if (tasks.length > 0) {
+        doc.autoTable({ startY: 50, head: [["#", "Task Name", "Status"]], body: tasks.map((t, i) => [i + 1, t.name, t.status]), theme: "grid" });
+      } else {
+        doc.text("No tasks found.", 20, 50);
+      }
+
+      // Habit Progress Section
+      let progressStartY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 70;
+      doc.setFontSize(14);
+      doc.setTextColor("#000");
+      doc.text("Habit Tracking Progress:", 20, progressStartY);
+
+      if (progress.length > 0) {
+        doc.autoTable({ startY: progressStartY + 5, head: [["#", "Habit", "Completion (%)"]], body: progress.map((p, i) => [i + 1, p.habit, p.percentage]), theme: "grid" });
+      } else {
+        doc.text("No progress data found.", 20, progressStartY + 5);
+      }
+
+      doc.save("Momentum_Progress_Report.pdf");
+    });
+  </script>
+</body>
+</html>

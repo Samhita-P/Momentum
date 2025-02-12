@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Momentum - Accurate Stats</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1B263B;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            animation: fadeInDown 1s ease-in-out;
+        }
+
+        .container {
+            text-align: center;
+            animation: zoomIn 1s ease;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .stats-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #4682B4;
+            border-radius: 10px;
+            background-color: #2C3E50;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1s ease;
+        }
+
+        .stat-item {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .highlight {
+            color: #A9D6E5;
+            font-weight: bold;
+        }
+
+        .button-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #4682B4;
+            color: #fff;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background: #5DADE2;
+            transform: scale(1.05);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Momentum - Group Overview</h1>
+
+    <div class="stats-section">
+        <div class="stat-item">
+            Group Code: <span class="highlight" id="groupCode">Loading...</span>
+        </div>
+        <div class="stat-item">
+            Members in Group: <span class="highlight" id="groupMembers">Loading...</span>/6
+        </div>
+    </div>
+
+    <div class="stats-section">
+        <div class="stat-item">
+            Total Habits Created: <span class="highlight" id="totalHabits">0</span>
+        </div>
+        <div class="stat-item">
+            Current Streak: <span class="highlight" id="streakCount">0 days</span>
+        </div>
+    </div>
+
+    <div class="button-container">
+        <button onclick="redirectToBadges()">View Badges</button>
+        <button onclick="redirectToTasks()">Tasks</button>
+        <button onclick="redirectToStats()">Stats</button>
+        <button onclick="redirectToSocialLife()">Social Life</button> <!-- Social Life Button -->
+        <button onclick="redirectToNotifications()">Notifications</button> <!-- Notifications Button -->
+    </div>
+</div>
+
+<script>
+    // Mock user data for testing
+    const userData = {
+        totalHabits: 8,
+        streakCount: 12
+    };
+
+    // Get or create group data
+    function initializeGroupData() {
+        const groupCode = localStorage.getItem("currentGroupCode") || prompt("Enter or create a new group code (e.g., ABCD12):");
+
+        // Save group code if not already saved
+        if (!localStorage.getItem("currentGroupCode")) {
+            localStorage.setItem("currentGroupCode", groupCode);
+        }
+
+        // Get group members or initialize for this group
+        let groupMembers = JSON.parse(localStorage.getItem("groupMembers")) || {};
+        if (!groupMembers[groupCode]) {
+            groupMembers[groupCode] = 1; // First member in this group
+        } else if (groupMembers[groupCode] < 6) {
+            groupMembers[groupCode] += 1; // Increment member count
+        }
+        localStorage.setItem("groupMembers", JSON.stringify(groupMembers));
+
+        return { groupCode, members: groupMembers[groupCode] };
+    }
+
+    // Update UI with group stats
+    function initializeGroupStats() {
+        const { groupCode, members } = initializeGroupData();
+
+        document.getElementById("groupCode").textContent = groupCode;
+        document.getElementById("groupMembers").textContent = members;
+    }
+
+    // Initialize user-specific stats
+    function initializeUserStats() {
+        document.getElementById("totalHabits").textContent = userData.totalHabits;
+        document.getElementById("streakCount").textContent = `${userData.streakCount} days`;
+    }
+
+    // Redirect functions
+    function redirectToBadges() {
+        window.location.href = "badges.html"; // Replace with actual file name
+    }
+
+    function redirectToTasks() {
+        window.location.href = "tasks.html"; // Replace with actual file name
+    }
+
+    function redirectToStats() {
+        window.location.href = "tracker.html"; // Replace with actual file name
+    }
+
+    function redirectToSocialLife() {
+        window.location.href = "leadershare.html"; // Replace with actual file name
+    }
+
+    function redirectToNotifications() {
+        window.location.href = "notification.html"; // Replace with actual file name
+    }
+
+    // Initialize everything on page load
+    initializeGroupStats();
+    initializeUserStats();
+</script>
+
+</body>
+</html>

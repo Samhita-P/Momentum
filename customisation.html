@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Momentum - Customize Your Experience</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #1B263B;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin: 20px 0;
+      color: #A9D6E5;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      animation: fadeInDown 1s ease-in-out;
+    }
+
+    h2 {
+      color: #5DADE2;
+      margin-bottom: 15px;
+      font-size: 1.8rem;
+      animation: fadeIn 1s ease;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+      animation: zoomIn 1.2s ease;
+    }
+
+    form {
+      background: #2C3E50;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      margin-bottom: 20px;
+      animation: fadeInUp 0.8s ease;
+    }
+
+    form label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #A9D6E5;
+    }
+
+    form input, form select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    form input, form select {
+      background: #34495E;
+      color: #fff;
+    }
+
+    button {
+      background: #4682B4;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background: #5DADE2;
+      transform: scale(1.05);
+    }
+
+    .habit-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .habit-item {
+      margin: 15px 0;
+      padding: 15px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #34495E, #1B263B);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      color: #A9D6E5;
+      font-size: 1.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideIn 0.8s ease;
+    }
+
+    .habit-item button {
+      padding: 5px 10px;
+      font-size: 0.9rem;
+      background: #E74C3C;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .habit-item button:hover {
+      background: #C0392B;
+    }
+
+    .theme-toggle {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .theme-toggle button {
+      width: auto;
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes zoomIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Momentum - Customize Your Experience</h1>
+  <div class="container">
+    <h2>Add a New Habit</h2>
+    <form id="habit-form">
+      <label for="habit-name">Habit Name</label>
+      <input type="text" id="habit-name" placeholder="E.g., Morning Run" required>
+      
+      <label for="habit-category">Category</label>
+      <select id="habit-category">
+        <option value="Health">Health</option>
+        <option value="Fitness">Fitness</option>
+        <option value="Productivity">Productivity</option>
+        <option value="Hobbies">Hobbies</option>
+      </select>
+      
+      <button type="submit">Add Habit</button>
+    </form>
+
+    <h2>Your Habits</h2>
+    <ul id="habit-list" class="habit-list"></ul>
+
+    <div class="theme-toggle">
+      <h2>Choose Theme</h2>
+      <button onclick="toggleTheme()">Switch Theme</button>
+    </div>
+  </div>
+
+  <script>
+    const habitForm = document.getElementById('habit-form');
+    const habitList = document.getElementById('habit-list');
+    const body = document.body;
+
+    let habits = JSON.parse(localStorage.getItem('habits')) || [];
+
+    // Save habits to localStorage
+    function saveHabits() {
+      localStorage.setItem('habits', JSON.stringify(habits));
+    }
+
+    // Render habits in the UI
+    function renderHabits() {
+      habitList.innerHTML = '';
+      habits.forEach((habit, index) => {
+        const habitItem = document.createElement('li');
+        habitItem.className = 'habit-item';
+        habitItem.innerHTML = `
+          <span>${habit.name} - <em>${habit.category}</em></span>
+          <button onclick="deleteHabit(${index})">Delete</button>
+        `;
+        habitList.appendChild(habitItem);
+      });
+    }
+
+    // Add a new habit
+    function addHabit(e) {
+      e.preventDefault();
+      const name = document.getElementById('habit-name').value;
+      const category = document.getElementById('habit-category').value;
+      habits.push({ name, category });
+      saveHabits();
+      renderHabits();
+      habitForm.reset();
+    }
+
+    // Delete a habit
+    function deleteHabit(index) {
+      habits.splice(index, 1);
+      saveHabits();
+      renderHabits();
+    }
+
+    // Apply the saved theme
+    function applyTheme() {
+      const currentTheme = localStorage.getItem('theme') || 'dark';
+      body.className = currentTheme === 'dark' ? '' : 'light';
+      body.style.backgroundColor = currentTheme === 'dark' ? '#1B263B' : '#F5F5F5';
+      body.style.color = currentTheme === 'dark' ? '#fff' : '#000';
+    }
+
+    // Toggle the theme
+    function toggleTheme() {
+      const currentTheme = localStorage.getItem('theme') || 'dark';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', newTheme);
+      applyTheme();
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+      applyTheme();
+      renderHabits();
+    });
+
+    habitForm.addEventListener('submit', addHabit);
+  </script>
+</body>
+</html>
